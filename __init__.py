@@ -40,8 +40,8 @@ def extract_minutes(date_string):
         return jsonify({'minutes': minutes})
   
 @app.route("/commits/")
-def commit():
-    return render_template("commit.html")
+def commits():
+    return render_template("commits.html")
   
 if __name__ == "__main__": #commentaires
   app.run(debug=True)
