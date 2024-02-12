@@ -1,59 +1,53 @@
-<html lang="en">
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quantité de commits par minute</title>
-<script>
-window.onload = function() {
-    // URL du fichier JSON contenant les données des commits
-    var jsonURL = 'https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits';
+    <meta charset="UTF-8">
+    <title>Commits Timeline</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        google.charts.load('current', {'packages':['corechart']});
 
-    // Fonction pour récupérer les données JSON
-    function fetchCommitsData() {
-        return fetch(jsonURL)
-            .then(response => response.json())
-            .then(data => processData(data))
-            .catch(error => console.error('Erreur lors de la récupération des données :', error));
-    }
+        function drawChart(dataArray) {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Date de Commit');
+            data.addColumn('number', 'Nombre de Commits');
 
-    // Fonction pour traiter les données JSON
-    function processData(data) {
-        var commits = data.Commit;
-        var commitsPerMinute = {};
+            dataArray.forEach(function (row) {
+                data.addRow(row);
+            });
 
-        // Boucler à travers tous les commits et compter les commits par minute
-        commits.forEach(function(commit) {
-            var date = new Date(commit.author.date);
-            var minute = date.getMinutes();
-            if (!commitsPerMinute[minute]) {
-                commitsPerMinute[minute] = 0;
-            }
-            commitsPerMinute[minute]++;
-        });
+            var options = {
+                title: 'Commits par Timestamp',
+                hAxis: { title: 'Timestamp', slantedText: true, slantedTextAngle: 45 },
+                vAxis: { title: 'Nombre de Commits' },
+                legend: 'none'
+            };
 
-        // Afficher les données
-        displayData(commitsPerMinute);
-    }
-
-    // Fonction pour afficher les données
-    function displayData(commitsPerMinute) {
-        var output = document.getElementById('output');
-        var html = '<h2>Quantité de commits par minute :</h2><ul>';
-
-        for (var minute in commitsPerMinute) {
-            html += '<li>' + minute + ' : ' + commitsPerMinute[minute] + ' commits</li>';
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
         }
-        html += '</ul>';
 
-        output.innerHTML = html;
-    }
+        async function loadCommitData() {
+            const response = await fetch('https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits');
+            const commits = await response.json();
+            const dataArray = [];
 
-    // Appeler la fonction pour récupérer les données JSON une fois la page chargée
-    fetchCommitsData();
-};
-</script>
+            commits.forEach(commit => {
+
+                const fullDate = commit.commit.author.date;
+
+                const date = new Date(fullDate);
+                const dateString = date.toISOString();
+
+                dataArray.push([dateString, 1]);
+            });
+
+            drawChart(dataArray);
+        }
+
+        google.charts.setOnLoadCallback(loadCommitData);
+    </script>
 </head>
 <body>
-<div id="output"></div>
+    <div id="chart_div" style="width: 100%; height: 500px;"></div>
 </body>
 </html>
