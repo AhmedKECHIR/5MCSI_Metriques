@@ -36,7 +36,7 @@ def monhistogramme():
 
 @app.route("/commits/")
 def commit():
-    return render_template("commit.html")
+    return render_template("commits.html")
 
 @app.route('/extract-minutes/<date_string>')
 def extract_minutes(date_string):
